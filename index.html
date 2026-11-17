@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101827"><meta name="description" content="Ike's Money Manager — personal and business finance tracking.">
+<title>Ike's Money Manager</title>
+<style>
+:root{--bg:#f3f5f8;--panel:#fff;--ink:#172033;--muted:#687386;--line:#e6eaf0;--accent:#176b55;--red:#c24141;--nav:#101827}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px system-ui,-apple-system,Segoe UI,sans-serif}header{background:var(--nav);color:white;padding:20px max(18px,calc((100% - 1050px)/2));display:flex;align-items:center;justify-content:space-between;gap:12px}header h1{font-size:20px;margin:0}header small{color:#b8c4d5}.wrap{max-width:1050px;margin:auto;padding:18px}.tabs{display:flex;gap:8px;overflow:auto;margin:4px 0 18px}.tabs button,.btn{border:0;border-radius:10px;padding:11px 14px;background:#e5eaf0;color:var(--ink);font-weight:650;white-space:nowrap}.tabs button.active,.btn.primary{background:var(--accent);color:white}.btn.dark{background:var(--nav);color:white}.btn.danger{background:#fff0f0;color:var(--red)}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:16px;min-width:0}.metric span{color:var(--muted);font-size:13px}.metric strong{display:block;font-size:22px;margin-top:7px;overflow-wrap:anywhere}.section{margin:18px 0}.section h2{font-size:17px;margin:0 0 12px}.accounts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.account strong{display:block;margin:6px 0;font-size:18px}.muted{color:var(--muted)}form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}label{display:block;font-size:13px;color:var(--muted)}input,select,textarea{width:100%;padding:12px;border:1px solid #d9e0e8;border-radius:10px;background:white;color:var(--ink);font:inherit;margin-top:5px}textarea{min-height:76px}.full{grid-column:1/-1}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:570px}th,td{text-align:left;padding:11px 8px;border-bottom:1px solid var(--line);font-size:13px}th{color:var(--muted);font-weight:600}.in{color:var(--accent);font-weight:700}.out{color:var(--red);font-weight:700}.hidden{display:none!important}.notice{padding:12px;border-radius:10px;background:#eef5f2;color:#315b4d;font-size:13px;line-height:1.5}.empty{text-align:center;padding:28px;color:var(--muted)}footer{padding:24px 0;color:var(--muted);font-size:12px}.pill{font-size:11px;background:#edf1f5;border-radius:20px;padding:4px 8px}
+@media(max-width:700px){.grid{grid-template-columns:repeat(2,1fr)}.accounts{grid-template-columns:1fr}header{align-items:flex-start;flex-direction:column}form{grid-template-columns:1fr}.full{grid-column:auto}.wrap{padding:13px}.metric strong{font-size:19px}}
+</style></head>
+<body>
+<header><div><h1>Ike's Money Manager</h1><small>Know where your money goes.</small></div><span class="pill">GHS · GH₵</span></header>
+<main class="wrap">
+<nav class="tabs" aria-label="Main navigation"><button class="active" data-tab="dashboard">Dashboard</button><button data-tab="add">Add transaction</button><button data-tab="history">Transactions</button><button data-tab="reports">Reports</button><button data-tab="backup">Backup & settings</button></nav>
+<section id="dashboard">
+<div class="grid">
+<div class="card metric"><span>Total balance</span><strong id="total">GH₵0.00</strong></div><div class="card metric"><span>Income this month</span><strong id="income">GH₵0.00</strong></div><div class="card metric"><span>Expenses this month</span><strong id="expense">GH₵0.00</strong></div><div class="card metric"><span>Net this month</span><strong id="net">GH₵0.00</strong></div>
+</div>
+<div class="section"><h2>Account balances</h2><div class="accounts" id="accounts"></div></div>
+<div class="section card"><h2>Recent transactions</h2><div id="recent" class="tablewrap"></div></div>
+<div class="notice">Your records are saved in this browser on this device. Use Backup & settings regularly to download a backup. Automatic bank or mobile-money syncing is not connected; enter transactions here and balances update automatically.</div>
+</section>
+<section id="add" class="hidden">
+<div class="card"><h2 id="formTitle">Record a transaction</h2>
+<form id="txForm">
+<label>Transaction type<select id="type"><option value="expense">Expense</option><option value="income">Income</option><option value="transfer">Transfer between my accounts</option></select></label>
+<label>Amount (GH₵)<input id="amount" type="number" min="0.01" step="0.01" required placeholder="e.g. 50.00"></label>
+<label>From / account<select id="account" required></select></label>
+<label id="toWrap" class="hidden">To account<select id="toAccount"></select></label>
+<label>Category<select id="category"><option>Food</option><option>Transport</option><option>Housing</option><option>Bills</option><option>Business</option><option>Materials & tools</option><option>Salary</option><option>Sales</option><option>Family</option><option>Health</option><option>Education</option><option>Giving</option><option>Other</option></select></label>
+<label>Date<input id="date" type="date" required></label>
+<label class="full">Note (optional)<input id="note" maxlength="100" placeholder="What was this for?"></label>
+<div class="full actions"><button class="btn primary" type="submit">Save transaction</button><button class="btn" type="button" id="clearForm">Clear</button></div>
+</form></div>
+</section>
+<section id="history" class="hidden"><div class="card"><h2>All transactions</h2><div class="actions"><select id="filterType" style="max-width:180px"><option value="all">All types</option><option value="income">Income</option><option value="expense">Expenses</option><option value="transfer">Transfers</option></select><select id="filterAccount" style="max-width:190px"><option value="all">All accounts</option></select></div><div id="allTx" class="tablewrap section"></div></div></section>
+<section id="reports" class="hidden"><div class="card"><h2>Monthly report</h2><label style="max-width:240px">Choose month<input id="month" type="month"></label><div class="grid section"><div class="card metric"><span>Income</span><strong id="rIncome">GH₵0.00</strong></div><div class="card metric"><span>Expenses</span><strong id="rExpense">GH₵0.00</strong></div><div class="card metric"><span>Net</span><strong id="rNet">GH₵0.00</strong></div><div class="card metric"><span>Transactions</span><strong id="rCount">0</strong></div></div><h2>Spending by category</h2><div id="categories"></div></div></section>
+<section id="backup" class="hidden"><div class="card"><h2>Backup your data</h2><p class="muted">Download a copy of your transactions and balances. Keep it somewhere safe.</p><div class="actions"><button class="btn primary" id="exportJson">Download full backup</button><button class="btn" id="exportCsv">Download transactions CSV</button><label class="btn" style="cursor:pointer">Restore backup<input id="restore" type="file" accept="application/json" hidden></label></div><hr style="border:0;border-top:1px solid var(--line);margin:22px 0"><h2>Starting balances</h2><p class="muted">Set the amount currently in each account. This does not change your past transactions.</p><form id="balanceForm"><label>MTN MoMo (GH₵)<input id="balMtn" type="number" step=".01"></label><label>GCB Bank (GH₵)<input id="balGcb" type="number" step=".01"></label><label>Payoneer (GH₵ equivalent)<input id="balPay" type="number" step=".01"></label><div class="full actions"><button class="btn primary">Save balances</button></div></form><p class="muted">Payoneer balance is recorded in Ghana cedi equivalent in this first version. You can update it manually using the current exchange rate.</p></div></section>
+<footer> Ike's Money Manager · Version 1 · Your data stays in this browser unless you export it.</footer>
+</main>
+<script>
+const KEY='ikes-money-manager-v1';
+const defaults={accounts:[{id:'mtn',name:'MTN MoMo',opening:0},{id:'gcb',name:'GCB Bank',opening:0},{id:'pay',name:'Payoneer',opening:0}],transactions:[]};
+let data=load();
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||structuredClone(defaults)}catch{return structuredClone(defaults)}}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render()}
+const money=n=>'GH₵'+Number(n||0).toLocaleString('en-GH',{minimumFractionDigits:2,maximumFractionDigits:2});
+const el=id=>document.getElementById(id);
+const today=()=>new Date().toISOString().slice(0,10);
+const monthNow=()=>today().slice(0,7);
+function balance(id){let a=data.accounts.find(x=>x.id===id);if(!a)return 0;return a.opening+data.transactions.reduce((s,t)=>{if(t.type==='income'&&t.account===id)s+=t.amount;if(t.type==='expense'&&t.account===id)s-=t.amount;if(t.type==='transfer'){if(t.account===id)s-=t.amount;if(t.toAccount===id)s+=t.amount}return s},0)}
+function signed(t){return t.type==='income'?t.amount:t.type==='expense'?-t.amount:0}
+function row(t){let label=t.type==='income'?'Income':t.type==='expense'?'Expense':'Transfer';let account=data.accounts.find(a=>a.id===t.account)?.name||'Account';let dest=data.accounts.find(a=>a.id===t.toAccount)?.name;return '<tr><td>'+t.date+'</td><td>'+label+'</td><td>'+account+(dest?' → '+dest:'')+'</td><td>'+esc(t.category||'—')+(t.note?' · '+esc(t.note):'')+'</td><td class="'+(t.type==='income'?'in':t.type==='expense'?'out':'')+'">'+(t.type==='income'?'+':t.type==='expense'?'−':'')+money(t.amount)+'</td></tr>'}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function table(items){return items.length?'<table><thead><tr><th>Date</th><th>Type</th><th>Account</th><th>Details</th><th>Amount</th></tr></thead><tbody>'+items.map(row).join('')+'</tbody></table>':'<div class="empty">No transactions yet. Add your first one to get started.</div>'}
+function render(){let m=monthNow(),tx=data.transactions;let inc=tx.filter(t=>t.type==='income'&&t.date.startsWith(m)).reduce((s,t)=>s+t.amount,0),out=tx.filter(t=>t.type==='expense'&&t.date.startsWith(m)).reduce((s,t)=>s+t.amount,0);
+el('total').textContent=money(data.accounts.reduce((s,a)=>s+balance(a.id),0));el('income').textContent=money(inc);el('expense').textContent=money(out);el('net').textContent=money(inc-out);
+el('accounts').innerHTML=data.accounts.map(a=>'<div class="card account"><span class="muted">'+a.name+'</span><strong>'+money(balance(a.id))+'</strong><small class="muted">Starting: '+money(a.opening)+'</small></div>').join('');
+el('recent').innerHTML=table([...tx].sort((a,b)=>b.date.localeCompare(a.date)||b.created-a.created).slice(0,6));
+let sorted=[...tx].sort((a,b)=>b.date.localeCompare(a.date)||b.created-a.created),ft=el('filterType').value,fa=el('filterAccount').value;
+el('allTx').innerHTML=table(sorted.filter(t=>(ft==='all'||t.type===ft)&&(fa==='all'||t.account===fa||t.toAccount===fa)));
+let rmonth=el('month').value||m,rt=tx.filter(t=>t.date.startsWith(rmonth)),ri=rt.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0),re=rt.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+el('rIncome').textContent=money(ri);el('rExpense').textContent=money(re);el('rNet').textContent=money(ri-re);el('rCount').textContent=rt.length;
+let cats={};rt.filter(t=>t.type==='expense').forEach(t=>cats[t.category]=(cats[t.category]||0)+t.amount);let entries=Object.entries(cats).sort((a,b)=>b[1]-a[1]);el('categories').innerHTML=entries.length?entries.map(([c,v])=>'<p>'+esc(c)+' <strong style="float:right">'+money(v)+'</strong></p><div style="height:7px;background:#edf0f3;border-radius:9px;overflow:hidden"><div style="height:100%;width:'+Math.max(2,v/re*100)+'%;background:#176b55;border-radius:9px"></div></div>').join(''):'<p class="muted">No expenses recorded for this month.</p>';
+populateSelects();el('balMtn').value=data.accounts.find(a=>a.id==='mtn').opening;el('balGcb').value=data.accounts.find(a=>a.id==='gcb').opening;el('balPay').value=data.accounts.find(a=>a.id==='pay').opening;
+}
+function populateSelects(){let opts=data.accounts.map(a=>'<option value="'+a.id+'">'+a.name+'</option>').join('');['account','toAccount'].forEach(id=>{let old=el(id).value;el(id).innerHTML=opts;if([...el(id).options].some(o=>o.value===old))el(id).value=old});let f=el('filterAccount'),old=f.value;f.innerHTML='<option value="all">All accounts</option>'+opts;if([...f.options].some(o=>o.value===old))f.value=old}
+document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));['dashboard','add','history','reports','backup'].forEach(id=>el(id).classList.toggle('hidden',id!==b.dataset.tab));render()}));
+el('date').value=today();el('month').value=monthNow();
+el('type').addEventListener('change',()=>el('toWrap').classList.toggle('hidden',el('type').value!=='transfer'));
+el('txForm').addEventListener('submit',e=>{e.preventDefault();let amount=Number(el('amount').value),type=el('type').value,account=el('account').value,toAccount=el('toAccount').value;if(!(amount>0))return alert('Enter an amount greater than zero.');if(type==='transfer'&&account===toAccount)return alert('Choose two different accounts for a transfer.');data.transactions.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),type,amount,account,toAccount:type==='transfer'?toAccount:null,category:type==='transfer'?'Transfer':el('category').value,date:el('date').value,note:el('note').value.trim(),created:Date.now()});el('txForm').reset();el('date').value=today();el('toWrap').classList.add('hidden');save();alert('Transaction saved.')});
+el('clearForm').onclick=()=>{el('txForm').reset();el('date').value=today();el('toWrap').classList.add('hidden')};
+['filterType','filterAccount','month'].forEach(id=>el(id).addEventListener('change',render));
+el('balanceForm').addEventListener('submit',e=>{e.preventDefault();data.accounts.find(a=>a.id==='mtn').opening=Number(el('balMtn').value)||0;data.accounts.find(a=>a.id==='gcb').opening=Number(el('balGcb').value)||0;data.accounts.find(a=>a.id==='pay').opening=Number(el('balPay').value)||0;save();alert('Starting balances saved.')});
+function download(name,content,type){let a=document.createElement('a'),u=URL.createObjectURL(new Blob([content],{type}));a.href=u;a.download=name;a.click();URL.revokeObjectURL(u)}
+el('exportJson').onclick=()=>download('ikes-money-manager-backup.json',JSON.stringify(data,null,2),'application/json');
+el('exportCsv').onclick=()=>{let lines=[['Date','Type','Amount GHS','Account','To account','Category','Note'],...data.transactions.map(t=>[t.date,t.type,t.amount,data.accounts.find(a=>a.id===t.account)?.name||'',data.accounts.find(a=>a.id===t.toAccount)?.name||'',t.category||'',t.note||''])];download('ikes-transactions.csv',lines.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n'),'text/csv')};
+el('restore').addEventListener('change',async e=>{let f=e.target.files[0];if(!f)return;try{let d=JSON.parse(await f.text());if(!Array.isArray(d.accounts)||!Array.isArray(d.transactions))throw Error();if(confirm('Replace the data currently saved in this browser with this backup?')){data=d;save();alert('Backup restored.')}}catch{alert('That file does not look like a valid Ike’s Money Manager backup.')}e.target.value=''});
+render();
+</script></body></html>
