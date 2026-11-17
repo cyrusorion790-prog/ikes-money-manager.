@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#101827"><meta name="description" content="Ike's Money Manager — personal and business finance tracking.">
+<link rel="manifest" href="./manifest.webmanifest">
 <title>Ike's Money Manager</title>
 <style>
 :root{--bg:#f3f5f8;--panel:#fff;--ink:#172033;--muted:#687386;--line:#e6eaf0;--accent:#176b55;--red:#c24141;--nav:#101827}
@@ -78,4 +79,5 @@ el('exportJson').onclick=()=>download('ikes-money-manager-backup.json',JSON.stri
 el('exportCsv').onclick=()=>{let lines=[['Date','Type','Amount GHS','Account','To account','Category','Note'],...data.transactions.map(t=>[t.date,t.type,t.amount,data.accounts.find(a=>a.id===t.account)?.name||'',data.accounts.find(a=>a.id===t.toAccount)?.name||'',t.category||'',t.note||''])];download('ikes-transactions.csv',lines.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n'),'text/csv')};
 el('restore').addEventListener('change',async e=>{let f=e.target.files[0];if(!f)return;try{let d=JSON.parse(await f.text());if(!Array.isArray(d.accounts)||!Array.isArray(d.transactions))throw Error();if(confirm('Replace the data currently saved in this browser with this backup?')){data=d;save();alert('Backup restored.')}}catch{alert('That file does not look like a valid Ike’s Money Manager backup.')}e.target.value=''});
 render();
+if ("serviceWorker" in navigator) window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
 </script></body></html>
