@@ -102,6 +102,7 @@ function parsePastedTransaction(raw){
 el('parsePaste').addEventListener('click',()=>{
  const raw=el('pasteText').value.trim();if(!raw){el('parseFeedback').classList.remove('hidden');el('parseFeedback').textContent='Paste a transaction statement first.';return}
  const found=parsePastedTransaction(raw);
+ ['scope','type','amount','account','category','date'].forEach(id=>el(id).value='');
  ['scope','type','amount','account','category','date'].forEach(id=>{if(found[id]!==undefined)el(id).value=found[id]});
  el('toWrap').classList.toggle('hidden',el('type').value!=='transfer');
  const missing=['amount','type','account','scope','category','date'].filter(id=>found[id]===undefined);
