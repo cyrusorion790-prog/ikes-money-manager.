@@ -80,9 +80,7 @@ function parsePastedTransaction(raw){
  if(isMtnAlert||/\b(mtn\s*momo|momo|mobile money|mtn mobile money)\b/i.test(low))found.account='mtn';
  else if(/\b(gcb|gcb bank|ghana commercial bank)\b/i.test(low))found.account='gcb';
  else if(/\b(payoneer)\b/i.test(low))found.account='pay';
- if(/\b(business|workshop|customer|client|supplier|materials|timber|plywood|carpentry|ike's)\b/i.test(low))found.scope='business';
- else if(/\b(personal|family|my own|household)\b/i.test(low))found.scope='personal';
- const categoryClues=(found.reference||el('reference')?.value||'').toLowerCase()+' '+low;
+ const referenceText=(found.reference||el('reference')?.value||'').toLowerCase();
  const categories=[
   ['Snacks & treats',['snack','snacks','treat','treats','biscuit','biscuits','chips','candy','chocolate']],
   ['Materials',['timber','wood','plywood','board','materials']],
@@ -104,9 +102,18 @@ function parsePastedTransaction(raw){
   ['Entertainment',['movie','cinema','game']]
  ];
  // Use the reference first when choosing a category, then fall back to the full SMS.
- const referenceText=(found.reference||el('reference')?.value||'').toLowerCase();
- for(const [cat,words] of categories){if(words.some(w=>referenceText.includes(w))){found.category=cat;break}}
- if(!found.category){for(const [cat,words] of categories){if(words.some(w=>low.includes(w))){found.category=cat;break}}}
+ // The reference takes priority for both category and purpose.
+ const referenceCategory=categories.find(([cat,words])=>words.some(w=>referenceText.includes(w)))?.[0];
+ if(referenceCategory)found.category=referenceCategory;
+ else {for(const [cat,words] of categories){if(words.some(w=>low.includes(w))){found.category=cat;break}}}
+ const personalCategories=['Snacks & treats','Food','Eating out','Airtime & data','Bills','Health','Education','Shopping','Entertainment'];
+ const businessCategories=['Materials','Labour','Tools & equipment','Workshop rent','Packaging','Marketing'];
+ if(referenceCategory&&personalCategories.includes(referenceCategory))found.scope='personal';
+ else if(referenceCategory&&businessCategories.includes(referenceCategory))found.scope='business';
+ else if(/\b(personal|family|my own|household|snacks?|treats?|biscuit|biscuits|chips|candy|chocolate|groceries|foodstuff|restaurant|eatery|lunch|dinner|takeaway|clothes|shopping|clothing|movie|cinema|game)\b/i.test(referenceText))found.scope='personal';
+ else if(/\b(business|workshop|customer|client|supplier|materials|timber|plywood|carpentry|ike's|tools?|equipment|drill|saw|machine|labour|labor|worker|workman|packaging|advertising|promotion)\b/i.test(referenceText))found.scope='business';
+ else if(/\b(business|workshop|customer|client|supplier|materials|timber|plywood|carpentry|ike's)\b/i.test(low))found.scope='business';
+ else if(/\b(personal|family|my own|household)\b/i.test(low))found.scope='personal';
  let d=text.match(/\b(20\d{2})-(\d{1,2})-(\d{1,2})\b/);
  if(d)found.date=d[1]+'-'+d[2].padStart(2,'0')+'-'+d[3].padStart(2,'0');
  if(!found.date){d=text.match(/\b(\d{1,2})[\/-](\d{1,2})[\/-](20\d{2})\b/);if(d){let a=Number(d[1]),b=Number(d[2]),y=d[3];let day=a>12?a:b,month=a>12?b:a;if(day<=31&&month<=12)found.date=y+'-'+String(month).padStart(2,'0')+'-'+String(day).padStart(2,'0')}}
