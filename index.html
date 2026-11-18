@@ -7,7 +7,7 @@
 <title>Ike's Money Manager</title>
 <style>
 :root{--bg:#f3f5f8;--panel:#fff;--ink:#172033;--muted:#687386;--line:#e6eaf0;--accent:#176b55;--red:#c24141;--nav:#101827}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px system-ui,-apple-system,Segoe UI,sans-serif}header{background:var(--nav);color:white;padding:20px max(18px,calc((100% - 1050px)/2));display:flex;align-items:center;justify-content:space-between;gap:12px}header h1{font-size:20px;margin:0}header small{color:#b8c4d5}.wrap{max-width:1050px;margin:auto;padding:18px}.tabs{display:flex;gap:8px;overflow:auto;margin:4px 0 18px}.tabs button,.btn{border:0;border-radius:10px;padding:11px 14px;background:#e5eaf0;color:var(--ink);font-weight:650;white-space:nowrap}.tabs button.active,.btn.primary{background:var(--accent);color:white}.btn.dark{background:var(--nav);color:white}.btn.danger{background:#fff0f0;color:var(--red)}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:16px;min-width:0}.metric span{color:var(--muted);font-size:13px}.metric strong{display:block;font-size:22px;margin-top:7px;overflow-wrap:anywhere}.section{margin:18px 0}.section h2{font-size:17px;margin:0 0 12px}.accounts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.account strong{display:block;margin:6px 0;font-size:18px}.muted{color:var(--muted)}form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}label{display:block;font-size:13px;color:var(--muted)}input,select,textarea{width:100%;padding:12px;border:1px solid #d9e0e8;border-radius:10px;background:white;color:var(--ink);font:inherit;margin-top:5px}textarea{min-height:76px}.full{grid-column:1/-1}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:570px}th,td{text-align:left;padding:11px 8px;border-bottom:1px solid var(--line);font-size:13px}th{color:var(--muted);font-weight:600}.in{color:var(--accent);font-weight:700}.out{color:var(--red);font-weight:700}.hidden{display:none!important}.notice{padding:12px;border-radius:10px;background:#eef5f2;color:#315b4d;font-size:13px;line-height:1.5}.empty{text-align:center;padding:28px;color:var(--muted)}footer{padding:24px 0;color:var(--muted);font-size:12px}.pill{font-size:11px;background:#edf1f5;border-radius:20px;padding:4px 8px}#recent th:nth-child(2),#recent td:nth-child(2){display:none}.action-cell{white-space:nowrap}.action-cell .btn{padding:7px 9px;margin:2px}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px system-ui,-apple-system,Segoe UI,sans-serif}header{background:var(--nav);color:white;padding:20px max(18px,calc((100% - 1050px)/2));display:flex;align-items:center;justify-content:space-between;gap:12px}header h1{font-size:20px;margin:0}header small{color:#b8c4d5}.wrap{max-width:1050px;margin:auto;padding:18px}.tabs{display:flex;gap:8px;overflow:auto;margin:4px 0 18px}.tabs button,.btn{border:0;border-radius:10px;padding:11px 14px;background:#e5eaf0;color:var(--ink);font-weight:650;white-space:nowrap}.tabs button.active,.btn.primary{background:var(--accent);color:white}.btn.dark{background:var(--nav);color:white}.btn.danger{background:#fff0f0;color:var(--red)}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:16px;min-width:0}.metric span{color:var(--muted);font-size:13px}.metric strong{display:block;font-size:22px;margin-top:7px;overflow-wrap:anywhere}.section{margin:18px 0}.section h2{font-size:17px;margin:0 0 12px}.accounts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.account strong{display:block;margin:6px 0;font-size:18px}.muted{color:var(--muted)}form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}label{display:block;font-size:13px;color:var(--muted)}input,select,textarea{width:100%;padding:12px;border:1px solid #d9e0e8;border-radius:10px;background:white;color:var(--ink);font:inherit;margin-top:5px}textarea{min-height:76px}.full{grid-column:1/-1}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:570px}th,td{text-align:left;padding:11px 8px;border-bottom:1px solid var(--line);font-size:13px}th{color:var(--muted);font-weight:600}.in{color:var(--accent);font-weight:700}.out{color:var(--red);font-weight:700}.hidden{display:none!important}.notice{padding:12px;border-radius:10px;background:#eef5f2;color:#315b4d;font-size:13px;line-height:1.5}.empty{text-align:center;padding:28px;color:var(--muted)}footer{padding:24px 0;color:var(--muted);font-size:12px}.pill{font-size:11px;background:#edf1f5;border-radius:20px;padding:4px 8px}#recent th:nth-child(2),#recent td:nth-child(2){display:none}.action-cell{white-space:nowrap}.field-missing{border:2px solid #c24141!important;background:#fff8f8!important}.label-missing{color:#b42318!important;font-weight:700}.missing-hint{display:block;color:#b42318;font-size:12px;margin-top:4px}.action-cell .btn{padding:7px 9px;margin:2px}
 @media(max-width:700px){.grid{grid-template-columns:repeat(2,1fr)}.accounts{grid-template-columns:1fr}header{align-items:flex-start;flex-direction:column}form{grid-template-columns:1fr}.full{grid-column:auto}.wrap{padding:13px}.metric strong{font-size:19px}}
 </style></head>
 <body>
@@ -24,6 +24,7 @@
 </section>
 <section id="add" class="hidden">
 <div class="card"><h2 id="formTitle">Record a transaction</h2>
+<div class="card section" id="pastePanel" style="background:#f8fafc"><h3 style="margin:0 0 6px">Paste a transaction statement</h3><p class="muted">Paste an SMS, bank alert or transaction description. Ike’s Money Manager will extract details it recognises. Check every field before saving.</p><label>Transaction statement<textarea id="pasteText" placeholder="Paste the full transaction message here..."></textarea></label><div class="actions"><button class="btn dark" type="button" id="parsePaste">Read transaction</button><button class="btn" type="button" id="clearPaste">Clear paste</button></div><div id="parseFeedback" class="notice hidden" style="margin-top:12px" aria-live="polite"></div></div>
 <form id="txForm">
 <label>Transaction purpose<select id="scope"><option value="personal">Personal</option><option value="business">Business</option></select></label>
 <label>Transaction type<select id="type"><option value="expense">Expense</option><option value="income">Income</option><option value="transfer">Transfer between my accounts</option></select></label>
@@ -57,6 +58,60 @@ function signed(t){return t.type==='income'?t.amount:t.type==='expense'?-t.amoun
 function row(t){let label=t.type==='income'?'Income':t.type==='expense'?'Expense':'Transfer';let account=data.accounts.find(a=>a.id===t.account)?.name||'Account';let dest=data.accounts.find(a=>a.id===t.toAccount)?.name;return '<tr><td>'+t.date+'</td><td class="action-cell"><button class="btn" type="button" data-edit="'+t.id+'">Edit</button><button class="btn danger" type="button" data-delete="'+t.id+'">Delete</button></td><td>'+label+'</td><td>'+account+(dest?' → '+dest:'')+'</td><td>'+esc(t.category||'—')+(t.note?' · '+esc(t.note):'')+'</td><td class="'+(t.type==='income'?'in':t.type==='expense'?'out':'')+'">'+(t.type==='income'?'+':t.type==='expense'?'−':'')+money(t.amount)+'</td></tr>'}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function table(items){return items.length?'<table><thead><tr><th>Date</th><th>Actions</th><th>Type</th><th>Account</th><th>Details</th><th>Amount</th></tr></thead><tbody>'+items.map(row).join('')+'</tbody></table>':'<div class="empty">No transactions yet. Add your first one to get started.</div>'}
+
+function clearParseMarks(){['scope','type','amount','account','category','date'].forEach(id=>{let field=el(id),label=field.closest('label');field.classList.remove('field-missing');label?.classList.remove('label-missing');label?.querySelector('.missing-hint')?.remove()})}
+function markMissing(ids){clearParseMarks();ids.forEach(id=>{let field=el(id),label=field.closest('label');field.classList.add('field-missing');label?.classList.add('label-missing');if(label){let hint=document.createElement('small');hint.className='missing-hint';hint.textContent='Not found — please fill this in.';label.appendChild(hint)}})}
+function parsePastedTransaction(raw){
+ const text=raw.trim(),low=text.toLowerCase(),found={};
+ let m=text.match(/(?:GH₵|GHS|₵)\s*([0-9][0-9,]*(?:\.\d{1,2})?)/i);
+ if(!m)m=text.match(/(?:amount|paid|received|debited|credited|withdrawn|transferred)\D{0,18}([0-9][0-9,]*(?:\.\d{1,2})?)/i);
+ if(m){let n=Number(m[1].replace(/,/g,''));if(n>0)found.amount=n}
+ if(/\b(received|credited|deposit|you have been paid|payment received|cashback)\b/i.test(low))found.type='income';
+ else if(/\b(sent|send|paid|payment to|purchase|withdrawn|debited|you paid|cash out|airtime|data bundle)\b/i.test(low))found.type='expense';
+ else if(/\b(transfer between|moved from .* to|transferred from .* to)\b/i.test(low))found.type='transfer';
+ if(/\b(mtn\s*momo|momo|mobile money|mtn mobile money)\b/i.test(low))found.account='mtn';
+ else if(/\b(gcb|gcb bank|ghana commercial bank)\b/i.test(low))found.account='gcb';
+ else if(/\b(payoneer)\b/i.test(low))found.account='pay';
+ if(/\b(business|workshop|customer|client|supplier|materials|timber|plywood|carpentry|ike's)\b/i.test(low))found.scope='business';
+ else if(/\b(personal|family|my own|household)\b/i.test(low))found.scope='personal';
+ const categories=[
+  ['Materials',['timber','wood','plywood','board','materials']],
+  ['Labour',['labour','labor','worker','workman']],
+  ['Tools & equipment',['tool','equipment','drill','saw','machine']],
+  ['Workshop rent',['workshop rent','shop rent']],
+  ['Utilities',['electricity','water bill','utility']],
+  ['Repairs & maintenance',['repair','maintenance']],
+  ['Packaging',['packaging','package']],
+  ['Marketing',['advert','advertising','promotion']],
+  ['Transport',['transport','taxi','uber','bolt','fuel','petrol']],
+  ['Food',['groceries','foodstuff','market','food']],
+  ['Eating out',['restaurant','eatery','lunch','dinner','takeaway']],
+  ['Airtime & data',['airtime','data bundle','internet bundle']],
+  ['Bills',['bill','subscription fee']],
+  ['Health',['hospital','pharmacy','medicine']],
+  ['Education',['school fees','tuition','books']],
+  ['Shopping',['clothes','shopping','clothing']],
+  ['Entertainment',['movie','cinema','game']]
+ ];
+ for(const [cat,words] of categories){if(words.some(w=>low.includes(w))){found.category=cat;break}}
+ let d=text.match(/\b(20\d{2})-(\d{1,2})-(\d{1,2})\b/);
+ if(d)found.date=d[1]+'-'+d[2].padStart(2,'0')+'-'+d[3].padStart(2,'0');
+ if(!found.date){d=text.match(/\b(\d{1,2})[\/-](\d{1,2})[\/-](20\d{2})\b/);if(d){let a=Number(d[1]),b=Number(d[2]),y=d[3];let day=a>12?a:b,month=a>12?b:a;if(day<=31&&month<=12)found.date=y+'-'+String(month).padStart(2,'0')+'-'+String(day).padStart(2,'0')}}
+ return found;
+}
+el('parsePaste').addEventListener('click',()=>{
+ const raw=el('pasteText').value.trim();if(!raw){el('parseFeedback').classList.remove('hidden');el('parseFeedback').textContent='Paste a transaction statement first.';return}
+ const found=parsePastedTransaction(raw);
+ ['scope','type','amount','account','category','date'].forEach(id=>{if(found[id]!==undefined)el(id).value=found[id]});
+ el('toWrap').classList.toggle('hidden',el('type').value!=='transfer');
+ const missing=['amount','type','account','scope','category','date'].filter(id=>found[id]===undefined);
+ markMissing(missing);
+ const feedback=el('parseFeedback');feedback.classList.remove('hidden');
+ feedback.innerHTML=missing.length?'<strong>Review needed:</strong> I could not identify '+missing.map(x=>({scope:'purpose (Personal or Business)',type:'transaction type',amount:'amount',account:'account',category:'category',date:'date'}[x])).join(', ')+'. These fields are highlighted below. Please check the other extracted details too.':'<strong>Details extracted.</strong> Please check the amount, type, account, purpose, category and date before saving.';
+ document.querySelector('[data-tab="add"]').classList.add('active');
+});
+el('clearPaste').addEventListener('click',()=>{el('pasteText').value='';el('parseFeedback').classList.add('hidden');clearParseMarks()});
+['scope','type','amount','account','category','date'].forEach(id=>el(id).addEventListener('input',()=>{let field=el(id),label=field.closest('label');field.classList.remove('field-missing');label?.classList.remove('label-missing');label?.querySelector('.missing-hint')?.remove()}));
 function render(){let m=monthNow(),tx=data.transactions;let inc=tx.filter(t=>t.type==='income'&&t.date.startsWith(m)).reduce((s,t)=>s+t.amount,0),out=tx.filter(t=>t.type==='expense'&&t.date.startsWith(m)).reduce((s,t)=>s+t.amount,0);
 el('total').textContent=money(data.accounts.reduce((s,a)=>s+balance(a.id),0));el('income').textContent=money(inc);el('expense').textContent=money(out);el('net').textContent=money(inc-out);
 el('accounts').innerHTML=data.accounts.map(a=>'<div class="card account"><span class="muted">'+a.name+'</span><strong>'+money(balance(a.id))+'</strong><small class="muted">Starting: '+money(a.opening)+'</small></div>').join('');
