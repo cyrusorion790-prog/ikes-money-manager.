@@ -67,9 +67,12 @@ function parsePastedTransaction(raw){
  if(!m)m=text.match(/(?:amount|paid|received|debited|credited|withdrawn|transferred)\D{0,18}([0-9][0-9,]*(?:\.\d{1,2})?)/i);
  if(m){let n=Number(m[1].replace(/,/g,''));if(n>0)found.amount=n}
  if(/\b(received|credited|deposit|you have been paid|payment received|cashback)\b/i.test(low))found.type='income';
- else if(/\b(sent|send|paid|payment to|purchase|withdrawn|debited|you paid|cash out|airtime|data bundle)\b/i.test(low))found.type='expense';
+ else if(/\b(sent|send|paid|payment to|payment made for|purchase|withdrawn|debited|you paid|cash out|airtime|data bundle)\b/i.test(low))found.type='expense';
  else if(/\b(transfer between|moved from .* to|transferred from .* to)\b/i.test(low))found.type='transfer';
- if(/\b(mtn\s*momo|momo|mobile money|mtn mobile money)\b/i.test(low))found.account='mtn';
+ // MTN alerts may identify the provider through their standard payment,
+ // balance, fee and MoMo App wording without explicitly saying "MTN".
+ const isMtnAlert=/\bpayment made for\b/i.test(low)&&/\bcurrent balance\s*:/i.test(low)&&/\bavailable balance\s*:/i.test(low)&&/\bfee charged\s*:/i.test(low)&&/\bdownload the momo app\b/i.test(low);
+ if(isMtnAlert||/\b(mtn\s*momo|momo|mobile money|mtn mobile money)\b/i.test(low))found.account='mtn';
  else if(/\b(gcb|gcb bank|ghana commercial bank)\b/i.test(low))found.account='gcb';
  else if(/\b(payoneer)\b/i.test(low))found.account='pay';
  if(/\b(business|workshop|customer|client|supplier|materials|timber|plywood|carpentry|ike's)\b/i.test(low))found.scope='business';
