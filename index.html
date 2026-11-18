@@ -82,7 +82,9 @@ function parsePastedTransaction(raw){
  else if(/\b(payoneer)\b/i.test(low))found.account='pay';
  if(/\b(business|workshop|customer|client|supplier|materials|timber|plywood|carpentry|ike's)\b/i.test(low))found.scope='business';
  else if(/\b(personal|family|my own|household)\b/i.test(low))found.scope='personal';
+ const categoryClues=(found.reference||el('reference')?.value||'').toLowerCase()+' '+low;
  const categories=[
+  ['Snacks & treats',['snack','snacks','treat','treats','biscuit','biscuits','chips','candy','chocolate']],
   ['Materials',['timber','wood','plywood','board','materials']],
   ['Labour',['labour','labor','worker','workman']],
   ['Tools & equipment',['tool','equipment','drill','saw','machine']],
@@ -101,7 +103,10 @@ function parsePastedTransaction(raw){
   ['Shopping',['clothes','shopping','clothing']],
   ['Entertainment',['movie','cinema','game']]
  ];
- for(const [cat,words] of categories){if(words.some(w=>low.includes(w))){found.category=cat;break}}
+ // Use the reference first when choosing a category, then fall back to the full SMS.
+ const referenceText=(found.reference||el('reference')?.value||'').toLowerCase();
+ for(const [cat,words] of categories){if(words.some(w=>referenceText.includes(w))){found.category=cat;break}}
+ if(!found.category){for(const [cat,words] of categories){if(words.some(w=>low.includes(w))){found.category=cat;break}}}
  let d=text.match(/\b(20\d{2})-(\d{1,2})-(\d{1,2})\b/);
  if(d)found.date=d[1]+'-'+d[2].padStart(2,'0')+'-'+d[3].padStart(2,'0');
  if(!found.date){d=text.match(/\b(\d{1,2})[\/-](\d{1,2})[\/-](20\d{2})\b/);if(d){let a=Number(d[1]),b=Number(d[2]),y=d[3];let day=a>12?a:b,month=a>12?b:a;if(day<=31&&month<=12)found.date=y+'-'+String(month).padStart(2,'0')+'-'+String(day).padStart(2,'0')}}
