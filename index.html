@@ -95,7 +95,7 @@ function parsePastedTransaction(raw){
  else if(/\b(transfer between|moved from .* to|transferred from .* to)\b/i.test(low))found.type='transfer';
  // Detect GCB alerts by their account/description/balance layout, even without the bank name.
  const isGcb=/\bA\/C\s+No\s*:/i.test(text)&&/\bDesc\s*:/i.test(text)&&/\bBal\s*:/i.test(text);
- const isMtn=/\b(mtn|momo|mobile money|MoMoBoost)\b/i.test(text)||/\bCurrent Balance\s*:/i.test(text)&&/\bFinancial Transaction ID\s*:/i.test(text);
+ const isMtn=/\b(mtn|momo|mobile money|MoMoBoost)\b/i.test(text)||/\bCurrent Balance\s*:/i.test(text)&&/\bFinancial Transaction ID\s*:/i.test(text)||/\bFRI\s*:/i.test(text)&&/\bFinancial Transaction ID\s*:/i.test(text)||/\bPayment received for\b/i.test(text)&&/\bCurrent Balance\s*:/i.test(text)&&/\bAvailable Balance\s*:/i.test(text)&&/\bTransaction ID\s*:/i.test(text);
  if(isGcb)found.account='gcb';
  else if(isMtn)found.account='mtn';
  else if(/\b(payoneer)\b/i.test(low))found.account='pay';
