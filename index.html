@@ -201,7 +201,40 @@ el('balanceForm').addEventListener('submit',e=>{e.preventDefault();data.accounts
 function download(name,content,type){let a=document.createElement('a'),u=URL.createObjectURL(new Blob([content],{type}));a.href=u;a.download=name;a.click();URL.revokeObjectURL(u)}
 el('exportJson').onclick=()=>download('my-manager-backup.json',JSON.stringify(data,null,2),'application/json');
 el('exportCsv').onclick=()=>{let lines=[['Date','Purpose','Type','Amount GHS','Account','To account','Category','Reference','Note'],...data.transactions.map(t=>[t.date,t.scope||'personal',t.type,t.amount,data.accounts.find(a=>a.id===t.account)?.name||'',data.accounts.find(a=>a.id===t.toAccount)?.name||'',t.category||'',t.reference||'',t.note||''])];download('my-manager-transactions.csv',lines.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n'),'text/csv')};
-el('restore').addEventListener('change',async e=>{let f=e.target.files[0];if(!f)return;try{let d=JSON.parse(await f.text());if(!Array.isArray(d.accounts)||!Array.isArray(d.transactions))throw Error();if(confirm('Replace the data currently saved in this browser with this backup?')){data=d;save();alert('Backup restored.')}}catch{alert('That file does not look like a valid Ike’s Money Manager backup.')}e.target.value=''});
+function validateBackup(d){
+ if(!d||typeof d!=='object'||!Array.isArray(d.accounts)||!Array.isArray(d.transactions))return 'The file is missing the accounts or transactions sections.';
+ if(d.accounts.length!==3)return 'The backup does not contain the three expected accounts.';
+ const expected=['mtn','gcb','pay'];
+ for(let i=0;i<d.accounts.length;i++){const a=d.accounts[i];if(!a||a.id!==expected[i]||typeof a.name!=='string'||!Number.isFinite(Number(a.opening)))return 'An account record is invalid.';}
+ const accountIds=new Set(d.accounts.map(a=>a.id));
+ for(const t of d.transactions){
+  if(!t||typeof t!=='object'||!['income','expense','transfer'].includes(t.type))return 'A transaction has an invalid type.';
+  if(!Number.isFinite(Number(t.amount))||Number(t.amount)<=0||!accountIds.has(t.account))return 'A transaction has an invalid amount or account.';
+  if(typeof t.date!=='string'||!/^\\d{4}-\\d{2}-\\d{2}$/.test(t.date)||Number.isNaN(Date.parse(t.date+'T00:00:00')))return 'A transaction has an invalid date.';
+  if(t.type==='transfer'&&(!accountIds.has(t.toAccount)||t.toAccount===t.account))return 'A transfer has invalid source or destination accounts.';
+  if(t.scope!==undefined&&!['personal','business'].includes(t.scope))return 'A transaction has an invalid purpose.';
+  for(const k of ['id','category','reference','note'])if(t[k]!==undefined&&(typeof t[k]!=='string'||t[k].length>300))return 'A transaction contains invalid text.';
+ }
+ return '';
+}
+el('restore').addEventListener('change',async e=>{
+ const f=e.target.files[0];if(!f)return;
+ try{
+  if(f.size>5*1024*1024)throw Error('This backup is larger than the 5 MB safety limit.');
+  const d=JSON.parse(await f.text()),problem=validateBackup(d);
+  if(problem)throw Error(problem);
+  const income=d.transactions.filter(t=>t.type==='income').length;
+  const expenses=d.transactions.filter(t=>t.type==='expense').length;
+  const transfers=d.transactions.filter(t=>t.type==='transfer').length;
+  const summary='Backup check passed.\\n\\nIt contains '+d.transactions.length+' transactions ('+income+' income, '+expenses+' expenses, '+transfers+' transfers).\\n\\nRestoring will replace the records currently saved on this device. Before replacing them, My Manager will download a safety copy of your current data. Continue?';
+  if(confirm(summary)){
+   download('my-manager-before-restore-'+today()+'.json',JSON.stringify(data,null,2),'application/json');
+   data=d;save();
+   alert('Backup restored successfully. A safety copy of the previous data was downloaded. Keep both files somewhere safe.');
+  }
+ }catch(err){alert('Backup not restored. '+(err.message||'The file is not valid.'));}
+ e.target.value='';
+});
 render();
 if ("serviceWorker" in navigator) window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
 </script></body></html>
