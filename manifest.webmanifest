@@ -1,6 +1,6 @@
 {
-  "name": "Ike's Money Manager",
-  "short_name": "Ike's Money",
+  "name": "My Manager",
+  "short_name": "My Manager",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f3f5f8",
