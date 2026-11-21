@@ -31,7 +31,7 @@
 <label>Amount (GH₵)<input id="amount" type="number" min="0.01" step="0.01" required placeholder="e.g. 50.00"></label>
 <label>From / account<select id="account" required></select></label>
 <label id="toWrap" class="hidden">To account<select id="toAccount"></select></label>
-<label>Category<select id="category"><option>Food</option><option>Transport</option><option>Housing</option><option>Bills</option><option>Business</option><option>Materials & tools</option><option>Salary</option><option>Sales</option><option>Family</option><option>Health</option><option>Education</option><option>Giving</option><option>Materials</option><option>Labour</option><option>Tools &amp; equipment</option><option>Workshop rent</option><option>Utilities</option><option>Repairs &amp; maintenance</option><option>Packaging</option><option>Marketing</option><option>Other business</option><option>Eating out</option><option>Entertainment</option><option>Shopping</option><option>Subscriptions</option><option>Snacks &amp; treats</option><option>Impulse purchases</option><option>Other</option></select></label>
+<label>Category<select id="category"><option>Food</option><option>Transport</option><option>Housing</option><option>Bills</option><option>Business</option><option>Materials & tools</option><option>Salary</option><option>Sales</option><option>Family</option><option>Health</option><option>Education</option><option>Giving</option><option>Materials</option><option>Labour</option><option>Tools &amp; equipment</option><option>Workshop rent</option><option>Utilities</option><option>Repairs &amp; maintenance</option><option>Packaging</option><option>Marketing</option><option>Other business</option><option>Eating out</option><option>Entertainment</option><option>Shopping</option><option>Subscriptions</option><option>Airtime &amp; data</option><option>Loans &amp; repayments</option><option>Snacks &amp; treats</option><option>Impulse purchases</option><option>Other</option></select></label>
 <label>Date<input id="date" type="date" required></label>
 <label>Reference (optional)<input id="reference" maxlength="100" placeholder="Transaction reference, if provided"></label>
 <label class="full">Note (optional)<input id="note" maxlength="100" placeholder="What was this for?"></label>
@@ -64,25 +64,45 @@ function clearParseMarks(){['scope','type','amount','account','category','date']
 function markMissing(ids){clearParseMarks();ids.forEach(id=>{let field=el(id),label=field.closest('label');field.classList.add('field-missing');label?.classList.add('label-missing');if(label){let hint=document.createElement('small');hint.className='missing-hint';hint.textContent='Not found — please fill this in.';label.appendChild(hint)}})}
 function parsePastedTransaction(raw){
  const text=raw.trim(),low=text.toLowerCase(),found={};
+ // Amount: use the first explicit GHS amount in the alert.
  let m=text.match(/(?:GH₵|GHS|₵)\s*([0-9][0-9,]*(?:\.\d{1,2})?)/i);
  if(!m)m=text.match(/(?:amount|paid|received|debited|credited|withdrawn|transferred)\D{0,18}([0-9][0-9,]*(?:\.\d{1,2})?)/i);
  if(m){let n=Number(m[1].replace(/,/g,''));if(n>0)found.amount=n}
- // Reference is optional. Only fill it when text exists between the
- // "Reference:" label and the following "Transaction ID:" label.
+ // Capture a human-readable description/payee separately from the transaction ID.
+ let desc=text.match(/\bDesc\s*:\s*(.*?)\s*(?=\bDate\s*:|$)/i);
+ if(desc&&desc[1].trim())found.note=desc[1].trim();
+ if(!found.note){
+  let payee=text.match(/\bCash[\s-]?Out\s+made\s+for\s+GHS\s*[0-9,.]+\s+to\s+(.+?)(?=\.\s*(?:Current Balance|Financial Transaction)|$)/i);
+  if(payee)found.note='Cash-out to '+payee[1].trim();
+  else if(/\bMTN AIRTIME\b/i.test(text))found.note='MTN airtime purchase';
+  else if(/\bSpotify\b/i.test(text))found.note='Spotify subscription';
+  else if(/\bMoMoBoost\b/i.test(text))found.note='MoMoBoost transaction';
+  else {
+   let payer=text.match(/\bPayment received for\s+GHS\s*[0-9,.]+\s+from\s+(.+?)(?=\s+Current Balance|\s+Available Balance|\.|$)/i);
+   if(payer)found.note='Payment received from '+payer[1].trim();
+  }
+ }
+ // Explicit reference, followed by provider transaction IDs where no reference exists.
  const refMatch=text.match(/\bReference\s*:\s*(.*?)\s*(?=\.?\s*Transaction\s*ID\s*:|$)/i);
- if(refMatch){const ref=refMatch[1].trim().replace(/^[.\s]+|[.\s]+$/g,'');if(ref)found.reference=ref;}
- if(/\b(received|credited|deposit|you have been paid|payment received|cashback)\b/i.test(low))found.type='income';
- else if(/\b(sent|send|paid|payment to|payment made for|purchase|withdrawn|debited|you paid|cash out|airtime|data bundle)\b/i.test(low))found.type='expense';
+ if(refMatch){const ref=refMatch[1].trim().replace(/^[.\s-]+|[.\s-]+$/g,'');if(ref)found.reference=ref;}
+ if(!found.reference){
+  const idMatch=text.match(/\bFinancial\s+Transaction\s+ID\s*:\s*([A-Z0-9-]+)/i)||text.match(/\bTransaction\s+ID\s*:\s*([A-Z0-9-]+)/i);
+  if(idMatch)found.reference=idMatch[1];
+ }
+ // Transaction direction and type.
+ if(/\b(repaid\s+from your account|has been repaid|cash[\s-]?out made|payment made for|payment to|payment of|used on|debited|airtime|withdrawn|you paid)\b/i.test(low))found.type='expense';
+ else if(/\b(credited|has been credited|payment received|received for|received from|deposit|cashback)\b/i.test(low))found.type='income';
  else if(/\b(transfer between|moved from .* to|transferred from .* to)\b/i.test(low))found.type='transfer';
- // MTN alerts may identify the provider through their standard payment,
- // balance, fee and MoMo App wording without explicitly saying "MTN".
- const isMtnAlert=/\bpayment made for\b/i.test(low)&&/\bcurrent balance\s*:/i.test(low)&&/\bavailable balance\s*:/i.test(low)&&/\bfee charged\s*:/i.test(low)&&/\bdownload the momo app\b/i.test(low);
- if(isMtnAlert||/\b(mtn\s*momo|momo|mobile money|mtn mobile money)\b/i.test(low))found.account='mtn';
- else if(/\b(gcb|gcb bank|ghana commercial bank)\b/i.test(low))found.account='gcb';
+ // Detect GCB alerts by their account/description/balance layout, even without the bank name.
+ const isGcb=/\bA\/C\s+No\s*:/i.test(text)&&/\bDesc\s*:/i.test(text)&&/\bBal\s*:/i.test(text);
+ const isMtn=/\b(mtn|momo|mobile money|MoMoBoost)\b/i.test(text)||/\bCurrent Balance\s*:/i.test(text)&&/\bFinancial Transaction ID\s*:/i.test(text);
+ if(isGcb)found.account='gcb';
+ else if(isMtn)found.account='mtn';
  else if(/\b(payoneer)\b/i.test(low))found.account='pay';
  const referenceText=(found.reference||el('reference')?.value||'').toLowerCase();
+ const clueText=(referenceText+' '+(found.note||'').toLowerCase()+' '+low);
  const categories=[
-  ['Snacks & treats',['snack','snacks','treat','treats','biscuit','biscuits','chips','candy','chocolate']],
+  ['Snacks & treats',['snack','treat','biscuit','chips','candy','chocolate']],
   ['Materials',['timber','wood','plywood','board','materials']],
   ['Labour',['labour','labor','worker','workman']],
   ['Tools & equipment',['tool','equipment','drill','saw','machine']],
@@ -95,28 +115,38 @@ function parsePastedTransaction(raw){
   ['Food',['groceries','foodstuff','market','food']],
   ['Eating out',['restaurant','eatery','lunch','dinner','takeaway']],
   ['Airtime & data',['airtime','data bundle','internet bundle']],
+  ['Subscriptions',['spotify','netflix','subscription','monthly plan']],
+  ['Loans & repayments',['momoboost','loan repayment','loan','repayment','repaid']],
   ['Bills',['bill','subscription fee']],
   ['Health',['hospital','pharmacy','medicine']],
   ['Education',['school fees','tuition','books']],
   ['Shopping',['clothes','shopping','clothing']],
   ['Entertainment',['movie','cinema','game']]
  ];
- // Use the reference first when choosing a category, then fall back to the full SMS.
- // The reference takes priority for both category and purpose.
- const referenceCategory=categories.find(([cat,words])=>words.some(w=>referenceText.includes(w)))?.[0];
+ // A meaningful manually supplied reference wins. Provider transaction IDs do not affect category inference.
+ const meaningfulRef=referenceText&&!/^[0-9A-Z-]{8,}$/i.test(referenceText);
+ let referenceCategory=meaningfulRef?categories.find(([cat,words])=>words.some(w=>referenceText.includes(w)))?.[0]:null;
+ let descriptionCategory=categories.find(([cat,words])=>words.some(w=>((found.note||'').toLowerCase()).includes(w)))?.[0];
  if(referenceCategory)found.category=referenceCategory;
+ else if(descriptionCategory)found.category=descriptionCategory;
  else {for(const [cat,words] of categories){if(words.some(w=>low.includes(w))){found.category=cat;break}}}
- const personalCategories=['Snacks & treats','Food','Eating out','Airtime & data','Bills','Health','Education','Shopping','Entertainment'];
+ const personalCategories=['Snacks & treats','Food','Eating out','Airtime & data','Bills','Health','Education','Shopping','Entertainment','Subscriptions'];
  const businessCategories=['Materials','Labour','Tools & equipment','Workshop rent','Packaging','Marketing'];
  if(referenceCategory&&personalCategories.includes(referenceCategory))found.scope='personal';
  else if(referenceCategory&&businessCategories.includes(referenceCategory))found.scope='business';
- else if(/\b(personal|family|my own|household|snacks?|treats?|biscuit|biscuits|chips|candy|chocolate|groceries|foodstuff|restaurant|eatery|lunch|dinner|takeaway|clothes|shopping|clothing|movie|cinema|game)\b/i.test(referenceText))found.scope='personal';
- else if(/\b(business|workshop|customer|client|supplier|materials|timber|plywood|carpentry|ike's|tools?|equipment|drill|saw|machine|labour|labor|worker|workman|packaging|advertising|promotion)\b/i.test(referenceText))found.scope='business';
- else if(/\b(business|workshop|customer|client|supplier|materials|timber|plywood|carpentry|ike's)\b/i.test(low))found.scope='business';
- else if(/\b(personal|family|my own|household)\b/i.test(low))found.scope='personal';
+ else if(descriptionCategory&&personalCategories.includes(descriptionCategory))found.scope='personal';
+ else if(descriptionCategory&&businessCategories.includes(descriptionCategory))found.scope='business';
+ else if(/\b(personal|family|my own|household|snacks?|treats?|biscuit|biscuits|chips|candy|chocolate|groceries|foodstuff|restaurant|eatery|lunch|dinner|takeaway|clothes|shopping|clothing|movie|cinema|game|spotify|netflix|airtime)\b/i.test(referenceText+' '+(found.note||'')))found.scope='personal';
+ else if(/\b(business|workshop|customer|client|supplier|materials|timber|plywood|carpentry|ike's|tools?|equipment|drill|saw|machine|labour|labor|worker|workman|packaging|advertising|promotion)\b/i.test(referenceText+' '+(found.note||'')))found.scope='business';
+ // Parse ISO timestamps and common bank date/time formats.
  let d=text.match(/\b(20\d{2})-(\d{1,2})-(\d{1,2})\b/);
  if(d)found.date=d[1]+'-'+d[2].padStart(2,'0')+'-'+d[3].padStart(2,'0');
- if(!found.date){d=text.match(/\b(\d{1,2})[\/-](\d{1,2})[\/-](20\d{2})\b/);if(d){let a=Number(d[1]),b=Number(d[2]),y=d[3];let day=a>12?a:b,month=a>12?b:a;if(day<=31&&month<=12)found.date=y+'-'+String(month).padStart(2,'0')+'-'+String(day).padStart(2,'0')}}
+ if(!found.date){d=text.match(/\b(\d{1,2})[\/-](\d{1,2})[\/-](20\d{2})\b/);if(d){let a=Number(d[1]),b=Number(d[2]),y=d[3],day=a>12?a:b,month=a>12?b:a;if(day<=31&&month<=12)found.date=y+'-'+String(month).padStart(2,'0')+'-'+String(day).padStart(2,'0')}}
+ // Include explicit MoMoBoost access fees in the recorded wallet outflow, while preserving the breakdown in the note.
+ const fee=text.match(/\baccess fee\s*GHS\s*([0-9]+(?:\.[0-9]{1,2})?)/i);
+ if(fee&&found.amount&&found.type==='expense'){const feeAmount=Number(fee[1]);found.amount=Number((found.amount+feeAmount).toFixed(2));found.note=(found.note||'MoMoBoost transaction')+' (includes access fee GH₵'+feeAmount.toFixed(2)+')'}
+ const cashFee=text.match(/\bfee charged\s*:\s*GHS\s*([0-9]+(?:\.[0-9]{1,2})?)/i);
+ if(cashFee&&found.amount&&/\bcash[\s-]?out made\b/i.test(low)){const feeAmount=Number(cashFee[1]);found.amount=Number((found.amount+feeAmount).toFixed(2));found.note=(found.note||'Cash-out')+' (includes cash-out fee GH₵'+feeAmount.toFixed(2)+')'}
  return found;
 }
 el('parsePaste').addEventListener('click',()=>{
