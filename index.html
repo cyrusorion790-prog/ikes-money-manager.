@@ -201,6 +201,20 @@ el('balanceForm').addEventListener('submit',e=>{e.preventDefault();data.accounts
 function download(name,content,type){let a=document.createElement('a'),u=URL.createObjectURL(new Blob([content],{type}));a.href=u;a.download=name;a.click();URL.revokeObjectURL(u)}
 el('exportJson').onclick=()=>download('my-manager-backup.json',JSON.stringify(data,null,2),'application/json');
 el('exportCsv').onclick=()=>{let lines=[['Date','Purpose','Type','Amount GHS','Account','To account','Category','Reference','Note'],...data.transactions.map(t=>[t.date,t.scope||'personal',t.type,t.amount,data.accounts.find(a=>a.id===t.account)?.name||'',data.accounts.find(a=>a.id===t.toAccount)?.name||'',t.category||'',t.reference||'',t.note||''])];download('my-manager-transactions.csv',lines.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n'),'text/csv')};
+function normalizeBackupDate(value){
+ if(typeof value!=='string')return '';
+ const s=value.trim();
+ let m=s.match(/^(\\d{4})-(\\d{1,2})-(\\d{1,2})(?:[T ].*)?$/);
+ if(m){const y=Number(m[1]),mo=Number(m[2]),d=Number(m[3]);return validDateParts(y,mo,d)?y+'-'+String(mo).padStart(2,'0')+'-'+String(d).padStart(2,'0'):''}
+ m=s.match(/^(\\d{1,2})[\\/-](\\d{1,2})[\\/-](\\d{4})$/);
+ if(m){const first=Number(m[1]),second=Number(m[2]),y=Number(m[3]);let day,month;
+  // Ghana-style DD/MM/YYYY is the default; unambiguous MM/DD/YYYY is also accepted.
+  if(first>12){day=first;month=second}else if(second>12){month=first;day=second}else{day=first;month=second}
+  return validDateParts(y,month,day)?y+'-'+String(month).padStart(2,'0')+'-'+String(day).padStart(2,'0'):'';
+ }
+ return '';
+}
+function validDateParts(y,m,d){const date=new Date(Date.UTC(y,m-1,d));return y>=2000&&y<=2100&&date.getUTCFullYear()===y&&date.getUTCMonth()===m-1&&date.getUTCDate()===d}
 function validateBackup(d){
  if(!d||typeof d!=='object'||!Array.isArray(d.accounts)||!Array.isArray(d.transactions))return 'The file is missing the accounts or transactions sections.';
  if(d.accounts.length!==3)return 'The backup does not contain the three expected accounts.';
@@ -210,7 +224,9 @@ function validateBackup(d){
  for(const t of d.transactions){
   if(!t||typeof t!=='object'||!['income','expense','transfer'].includes(t.type))return 'A transaction has an invalid type.';
   if(!Number.isFinite(Number(t.amount))||Number(t.amount)<=0||!accountIds.has(t.account))return 'A transaction has an invalid amount or account.';
-  if(typeof t.date!=='string'||!/^\\d{4}-\\d{2}-\\d{2}$/.test(t.date)||Number.isNaN(Date.parse(t.date+'T00:00:00')))return 'A transaction has an invalid date.';
+  const normalizedDate=normalizeBackupDate(t.date);
+  if(!normalizedDate)return 'A transaction has an invalid or unrecognised date. Please check its date in the original app before backing up again.';
+  t.date=normalizedDate;
   if(t.type==='transfer'&&(!accountIds.has(t.toAccount)||t.toAccount===t.account))return 'A transfer has invalid source or destination accounts.';
   if(t.scope!==undefined&&!['personal','business'].includes(t.scope))return 'A transaction has an invalid purpose.';
   for(const k of ['id','category','reference','note'])if(t[k]!==undefined&&(typeof t[k]!=='string'||t[k].length>300))return 'A transaction contains invalid text.';
